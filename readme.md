@@ -1,2 +1,2 @@
-#Objective:
-#How to use the code:
+#Objective
+#How to use the code
