@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-class Frame:
+class Frame(object):
 	def __init__(self, path):
 		self.path = path
 		self.frame = cv2.imread(path)
