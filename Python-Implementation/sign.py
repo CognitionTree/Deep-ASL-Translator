@@ -10,7 +10,7 @@ class Sign(object):
 		self.read_frames()
 		
 	def read_frames(self):
-		frames_paths = glob.glob('*')
+		frames_paths = glob.glob(self.path+'/*')
 		
 		for frame_path in frames_paths:
 			frame = Frame(frame_path)
