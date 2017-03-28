@@ -6,6 +6,10 @@ from frame import *
 class Sign(object):
 	def __init__(self, path):
 		self.path = path
+		
+		#Getting gloss
+		splitted_path = pat.split('/')
+		self.gloss = splitted_path[len(splitted_path)-1]
 		self.frames = []
 		self.read_frames()
 		
@@ -25,6 +29,9 @@ class Sign(object):
 	def get_frame_at(self, pos):
 		return self.frames[pos]
 	
+	def get_gloss(self):
+		return self.gloss
+	
 	def set_path(self, path):
 		self.path = path
 	
@@ -34,8 +41,11 @@ class Sign(object):
 	def set_frame_at(self, frame):
 		self.frames[pos] = frame
 	
+	def set_gloss(self, gloss):
+		self.gloss = gloss
+	
 	def __str__(self):
-		return self.path + '\n' + str(len(self.frames))+' frames'
+		return self.gloss+ + '\n' +self.path + '\n' + str(len(self.frames))+' frames'
 	
 	def __len__(self):
 		return len(self.frames)
