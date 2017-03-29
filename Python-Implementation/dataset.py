@@ -1,5 +1,6 @@
 from sign import *
 import glob
+from random import shuffle
 
 class Dataset(object):
 	FRONT_VIEW = 'Font'
@@ -14,7 +15,7 @@ class Dataset(object):
 		self.read_signs()
 	
 	def read_signs(self):
-		sings_paths = glob.glob(path+'/*')
+		sings_paths = glob.glob(self.path+'/*')
 		for sign_path in sings_paths:
 			sign = Sign(sign_path)
 			self.signs.append(sign)
@@ -42,7 +43,7 @@ class Dataset(object):
 		matrix = []
 		for sign in self.signs:
 			sign_matrix = []
-			for frame in sign.get_frames():
+			for frame in sign.get_frames_matrices():
 				sign_matrix.append(frame)
 			matrix.append(array(sign_matrix))
 		return array(matrix)
@@ -61,9 +62,9 @@ class Dataset(object):
 			cur_sign = self.signs[i]
 			
 			if cur_gloss in map_gloss_sign:
-				map_gloss_sign[gloss].append(cur_sign)
+				map_gloss_sign[cur_gloss].append(cur_sign)
 			else:
-				map_gloss_sign[gloss] = [cur_sign]
+				map_gloss_sign[cur_gloss] = [cur_sign]
 		return map_gloss_sign
 	
 	def get_data_split(self, training_fraction):
@@ -79,14 +80,16 @@ class Dataset(object):
 		
 		#Setting up initial train fractions to 0
 		train_count = {}
+		#train_fractions = {}
 		for gloss in map_gloss_sign:
-			train_fractions[gloss] = 0.0
+			train_count[gloss] = 0.0
 		
 		for i in range(len(self.gloss)):
 			cur_gloss = self.gloss[i]
 			cur_sign = signs_matrix[i]
 			
 			#Training
+			#print (train_count[cur_gloss]/(1.0*len(map_gloss_sign[cur_gloss])))
 			if (train_count[cur_gloss]/(1.0*len(map_gloss_sign[cur_gloss]))) < training_fraction:
 				X_train.append(cur_sign)
 				y_train.append(cur_gloss)
@@ -97,6 +100,13 @@ class Dataset(object):
 			train_count[cur_gloss] += 1.0
 		
 		return (array(X_train), array(y_train)), (array(X_test), array(y_test))
+		
+	def __str__(self):
+		seigns_str = ''
+		for sign in self.signs:
+			seigns_str += str(sign)
+			seigns_str += '\n'
+		return self.path+'\n'+str(len(self.signs)) + seigns_str
 		
 			
 		
