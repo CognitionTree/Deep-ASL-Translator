@@ -9,7 +9,7 @@ class Sign(object):
 		self.path = path
 		
 		#Getting gloss
-		splitted_path = path.split('/')
+		splitted_path = path.split('-')
 		self.gloss = splitted_path[len(splitted_path)-1]
 		self.frames = []
 		self.read_frames()
@@ -25,13 +25,13 @@ class Sign(object):
 		return self.path
 	
 	def get_frames(self):
-		return array(self.frames)
+		return self.frames
 
 	def get_frames_matrices(self):
 		frame_matrices = []
 		for frame in self.frames:
 			frame_matrices.append(frame.get_frame())
-		return array(frame_matrices)
+		return frame_matrices
 	
 	def get_frame_at(self, pos):
 		return self.frames[pos]
