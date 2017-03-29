@@ -5,8 +5,9 @@ from frame import *
 from numpy import *
 
 class Sign(object):
-	def __init__(self, path):
+	def __init__(self, path, numb_frames=36):
 		self.path = path
+		self.numb_frames = numb_frames 
 		
 		#Getting gloss
 		splitted_path = path.split('-')
@@ -16,11 +17,15 @@ class Sign(object):
 		
 	def read_frames(self):
 		frames_paths = glob.glob(self.path+'/*')
+		frames_paths.reverse()
 		
-		for frame_path in frames_paths:
+		for i in range(self.numb_frames):
+			frame_path = frames_paths[i]
 			frame = Frame(frame_path)
 			self.frames.append(frame)
 	
+		self.frames.reverse()
+		
 	def get_path(self):
 		return self.path
 	
@@ -35,6 +40,7 @@ class Sign(object):
 	
 	def get_frame_at(self, pos):
 		return self.frames[pos]
+	
 	
 	def get_frame_matrix_at(self, pos):
 		return self.frames[pos].get_frame()

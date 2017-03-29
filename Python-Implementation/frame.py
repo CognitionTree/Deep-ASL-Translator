@@ -5,7 +5,7 @@ class Frame(object):
 	def __init__(self, path):
 		self.path = path
 		self.frame = cv2.imread(path, 0)
-		self.frame = cv2.resize(self.frame, (0,0), fx=0.05, fy=0.05)
+		self.frame = cv2.resize(self.frame, (20,10))
 	
 	def get_path(self):
 		return self.path

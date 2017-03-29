@@ -24,13 +24,15 @@ class Dataset(object):
 			#self.signs.append(sign)
 			#self.gloss.append(sign.get_gloss())
 			sign_path = sign_path + '/'+self.view_point
-			print sign_path
+			#print sign_path
 			sign_versions_paths = glob.glob(sign_path+'/*')
 			#print sign_versions_paths
 			for sign_version_path in sign_versions_paths:
 				sign = Sign(sign_version_path)
 				self.signs.append(sign)
 				self.gloss.append(sign.get_gloss())
+				if len(sign) != 36:
+					print sign
 				if sign.get_gloss() not in self.gloss_to_number:
 					self.gloss_to_number[sign.get_gloss()] = i
 					i += 1
@@ -116,8 +118,8 @@ class Dataset(object):
 				
 			train_count[cur_gloss] += 1.0
 
-		print '============================='
-		print X_train
+		#print '============================='
+		#print X_train
 		X_train = np.array(X_train)
 		y_train = np.array(y_train)
 		X_test = np.array(X_test)
