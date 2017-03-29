@@ -1,9 +1,10 @@
 from sign import *
 import glob
 from random import shuffle
+import numpy as np
 
 class Dataset(object):
-	FRONT_VIEW = 'Font'
+	FRONT_VIEW = 'Front'
 	FACE_VIEW = 'Face'
 	SIDE_VIEW = 'Side'
 	
@@ -12,15 +13,31 @@ class Dataset(object):
 		self.view_point = view_point
 		self.gloss = []
 		self.signs = []
+		self.gloss_to_number = {}
 		self.read_signs()
 	
 	def read_signs(self):
+		i = 0
 		sings_paths = glob.glob(self.path+'/*')
 		for sign_path in sings_paths:
-			sign = Sign(sign_path)
-			self.signs.append(sign)
-			self.gloss.append(sign.get_gloss())
-	
+			#sign = Sign(sign_path)
+			#self.signs.append(sign)
+			#self.gloss.append(sign.get_gloss())
+			sign_path = sign_path + '/'+self.view_point
+			print sign_path
+			sign_versions_paths = glob.glob(sign_path+'/*')
+			#print sign_versions_paths
+			for sign_version_path in sign_versions_paths:
+				sign = Sign(sign_version_path)
+				self.signs.append(sign)
+				self.gloss.append(sign.get_gloss())
+				if sign.get_gloss() not in self.gloss_to_number:
+					self.gloss_to_number[sign.get_gloss()] = i
+					i += 1
+					
+			#if i == 3:
+				#break	
+				
 	def get_path(self):
 		return self.path
 	
@@ -28,7 +45,7 @@ class Dataset(object):
 		return self.view_point
 	
 	def get_glosses(self):
-		return array(self.glosses)
+		return self.glosses
 	
 	def get_gloss_at(self, pos):
 		return self.gloss[pos]
@@ -45,8 +62,8 @@ class Dataset(object):
 			sign_matrix = []
 			for frame in sign.get_frames_matrices():
 				sign_matrix.append(frame)
-			matrix.append(array(sign_matrix))
-		return array(matrix)
+			matrix.append(sign_matrix)
+		return matrix
 	
 	def shuffle_dataset(self):
 		shuffle(self.signs)
@@ -92,14 +109,23 @@ class Dataset(object):
 			#print (train_count[cur_gloss]/(1.0*len(map_gloss_sign[cur_gloss])))
 			if (train_count[cur_gloss]/(1.0*len(map_gloss_sign[cur_gloss]))) < training_fraction:
 				X_train.append(cur_sign)
-				y_train.append(cur_gloss)
+				y_train.append(self.gloss_to_number[cur_gloss])
 			else:
 				X_test.append(cur_sign)
-				y_test.append(cur_gloss)
+				y_test.append(self.gloss_to_number[cur_gloss])
 				
 			train_count[cur_gloss] += 1.0
-		
-		return (array(X_train), array(y_train)), (array(X_test), array(y_test))
+
+		print '============================='
+		print X_train
+		X_train = np.array(X_train)
+		y_train = np.array(y_train)
+		X_test = np.array(X_test)
+		y_test = np.array(y_test)
+		return (X_train, y_train), (X_test, y_test)
+	
+	def get_numb_classes(self):
+		return len(self.gloss_to_number)
 		
 	def __str__(self):
 		seigns_str = ''
