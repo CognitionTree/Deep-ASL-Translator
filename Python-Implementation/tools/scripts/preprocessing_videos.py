@@ -28,7 +28,7 @@ def read_and_save_all_frames(dataset_directory, words, camera_views):
 
 	#List containing all path for all videos in the dataset
 	all_videos_paths = []
-	height = 242
+	crop_height = 242
 	video_information_matrix = []
 	
 	for word in words:
@@ -39,6 +39,8 @@ def read_and_save_all_frames(dataset_directory, words, camera_views):
 	for video_path in all_videos_paths:
 		print "video: ", video_number, "/", len(all_videos_paths)
 		video_number += 1
+		#if video_number == 5:
+		#	break
 		
 		directory_name = video_path.split('.')[0]
 		
@@ -61,7 +63,7 @@ def read_and_save_all_frames(dataset_directory, words, camera_views):
 			if frame == None:
 				break
 			
-			cropped_frame = crop_frame(frame, 0, 0, len(frame[0]), height)
+			cropped_frame = crop_frame(frame, 0, 0, len(frame[0]), crop_height)
 			save_frame(directory_name + '/' + str(frame_count) + '.jpg', cropped_frame)
 			#print directory_name
 			frame_count += 1
@@ -77,6 +79,7 @@ def read_and_save_all_frames(dataset_directory, words, camera_views):
 		cap.release()
 		os.remove(video_path)
 		cv2.destroyAllWindows()
+		
 	
 	video_information_file = open(dataset_directory + "/video_information.txt", 'w')
 	for row in video_information_matrix:
@@ -92,7 +95,7 @@ words_list = get_words(dataset_directory)
 camera_views_all = ['Face', 'Front', 'Side']
 camera_views_single = ['Front']
 
-read_and_save_all_frames(dataset_directory, words_list, camera_views_single)
+read_and_save_all_frames(dataset_directory, words_list, camera_views_all)
 
 '''
 #This piece of code was done just to find the pixel at which the bottom black box starts.
