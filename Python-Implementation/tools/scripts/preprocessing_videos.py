@@ -23,40 +23,46 @@ def get_words(dataset_directory):
 		words.append(word_path.split('/')[-1])
 	
 	return words
-       
-def read_and_save_all_frames(dataset_directory, words, camera_views):
 
+def get_all_videos_paths(dataset_directory, words, camera_views):
 	#List containing all path for all videos in the dataset
 	all_videos_paths = []
-	crop_height = 242
-	video_information_matrix = []
 	
 	for word in words:
+		print word
 		for view in camera_views:
+			print view
 			all_videos_paths += glob.glob(dataset_directory + '/' + word + '/' + view + '/*.mp4')
 	
+	print all_videos_paths
+	return all_videos_paths
+
+def read_and_save_all_frames(all_videos_paths, frames_directory, crop_height):
+	video_information_matrix = []
 	video_number = 1
 	for video_path in all_videos_paths:
 		print "video: ", video_number, "/", len(all_videos_paths)
 		video_number += 1
-		#if video_number == 5:
-		#	break
-		
 		directory_name = video_path.split('.')[0]
+		
+		if video_number == 100:
+			break
 		
 		split_directory_name = directory_name.split('/')
 		video_name = split_directory_name[-1]
 		view = split_directory_name[-2]
 		word = split_directory_name[-3]
 
-		if not os.path.exists(directory_name):
-			os.makedirs(directory_name)
+		directory_name_to_save = frames_directory + '/' + word + '/' + view + '/' + video_name
+		if not os.path.exists(directory_name_to_save):
+			os.makedirs(directory_name_to_save)
 		else:
-			shutil.rmtree(directory_name)
-			os.makedirs(directory_name)
+			shutil.rmtree(directory_name_to_save)
+			os.makedirs(directory_name_to_save)
 		
 		cap = cv2.VideoCapture(video_path)
 		frame_count = 1
+		
 		while(cap.isOpened()):
 			ret, frame = cap.read()
 			
@@ -64,8 +70,7 @@ def read_and_save_all_frames(dataset_directory, words, camera_views):
 				break
 			
 			cropped_frame = crop_frame(frame, 0, 0, len(frame[0]), crop_height)
-			save_frame(directory_name + '/' + str(frame_count) + '.jpg', cropped_frame)
-			#print directory_name
+			save_frame(directory_name_to_save + '/' + str(frame_count) + '.jpg', cropped_frame)
 			frame_count += 1
 		
 		length = int(cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT))
@@ -77,39 +82,45 @@ def read_and_save_all_frames(dataset_directory, words, camera_views):
 		video_information_matrix.append(video_info)
 		
 		cap.release()
-		os.remove(video_path)
 		cv2.destroyAllWindows()
 		
+		
 	
-	video_information_file = open(dataset_directory + "/video_information.txt", 'w')
+	video_information_file = open("video_information.txt", 'w')
 	for row in video_information_matrix:
 		video_information_file.write(str(row) + '\n')
 		
+def finding_crop_size(dataset_directory):
+	frame_path = '/Users/danielaflorit/Github/ASL_Dataset/Dataset/Book/Front/ncslgr10a-002-04-dom-BOOK/1.jpg'
+	frame = cv2.imread(frame_path)
+	print_frame_col1(frame)
+	cropped_frame = crop_frame(frame, 0, 0, len(frame[0]), 242)
+	save_frame(dataset_directory + "cropped.jpg", cropped_frame)
+	
+	
+	'''This piece of code was done just to find the pixel at which the bottom black box starts.
+	This was done by inspection, by printing the first pixels of each column of the frame
+	it was determined that it was at pixel 242'''
+	
 		
-#-------------main-------------
-dataset_directory = '/Users/danielaflorit/Github/ASL_Dataset/Frames'
-words_list = get_words(dataset_directory)
+#-----------------main-----------------
+videos_directory = '/Users/danielaflorit/Github/ASL_Dataset/Videos'
+frames_directory = '/Users/danielaflorit/Github/ASL_Dataset/Frames'
+testing_directory = '/Users/danielaflorit/Github/ASL_Dataset/Testing'
+augmented_frames_directory = '/Users/danielaflorit/Github/ASL_Dataset/Frames_augmented'
 
-#for now, it's only taking care of the 'Front' view, using camera_views_single, and not  
-#including all other camera_views. In the future, this can be changed to use camera_views_all
-camera_views_all = ['Face', 'Front', 'Side']
-camera_views_single = ['Front']
+camera_views = ['Face', 'Front', 'Side']
+words_list = get_words(videos_directory)
+all_videos_paths = get_all_videos_paths(videos_directory, words_list, camera_views)
 
-read_and_save_all_frames(dataset_directory, words_list, camera_views_all)
+########################################
+#Uncomment to call finding_crop_size()
+#finding_crop_size(videos_directory)
+crop_height = 242 #this was found using the function above
 
-'''
-#This piece of code was done just to find the pixel at which the bottom black box starts.
-#This was done by inspection, by printing the first pixels of each column of the frame
-#it was determined that it was at pixel 242
-
-frame_path = '/Users/danielaflorit/Github/ASL_Dataset/Dataset/Book/Front/ncslgr10a-002-04-dom-BOOK/1.jpg'
-frame = cv2.imread(frame_path)
-print_frame_col1(frame)
-
-cropped_frame = crop_frame(frame, 0, 0, len(frame[0]), 242)
-save_frame(dataset_directory + "cropped.jpg", cropped_frame)
-'''
-
+########################################
+#Uncomment to split all videos by frame and crop the bottom section out
+#read_and_save_all_frames(all_videos_paths, frames_directory, crop_height)
 
 
 	
