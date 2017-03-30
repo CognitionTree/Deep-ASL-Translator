@@ -5,10 +5,12 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D
+from keras.utils import plot_model
 from dataset import *
 from numpy import *
+from plotting_tools import *
 
-dataset_path = '/Users/andymartinez/Datasets/ASL/Optical_flow'
+dataset_path = '/home/andy/Documents/Datasets/ASL/Optical_flow'
 train_frac = 0.75
 val_frac = 0.05
 test_frac = 0.2
@@ -18,8 +20,11 @@ dataset = Dataset(dataset_path)
 
 batch_size = 10
 num_classes = dataset.get_numb_classes()
-epochs = 30
+epochs = 150
 data_augmentation = True
+
+model_name = 'conv_model.png'
+cm_name = 'Confusion Matrix OF Conv'
 
 print("Here!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 print(X_train.shape, 'train samples')
@@ -65,6 +70,7 @@ model.add(Dense(num_classes))
 model.add(Activation('softmax'))
 #model.summary()
 model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+plot_model(model, to_file=model_name, show_shapes=True, show_layer_names=True)
 
 model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, verbose=1, validation_data=(X_val, y_val), shuffle=True)
 
@@ -72,3 +78,16 @@ score = model.evaluate(X_test, y_test, verbose=0)
 
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
+
+#Checking predictions
+predictions = model.predict_classes(X_test)
+#feature_vectors = model.predict(X_test)
+
+#Changing y_test to its label for confussion matrix
+y_test_label = []
+for y in y_test:
+	y_test_label.append(argmax(y))
+
+print(str(dataset.get_gloss_to_numb()))
+build_confusion_matrix(y_test_label, predictions, range(dataset.get_numb_classes()), title=cm_name)
+#display_feature_vectors(feature_vectors, y_test_label, predictions)

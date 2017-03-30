@@ -38,7 +38,10 @@ class Dataset(object):
 			 	
 		
 		shuffle(self.signs)
-		
+	
+	def get_gloss_to_numb(self):
+		return self.gloss_to_numb
+	
 	def get_numb_classes(self):
 		return len(self.gloss_count)
 	
