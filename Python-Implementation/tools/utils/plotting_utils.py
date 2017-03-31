@@ -19,7 +19,8 @@ def plot_confusion_matrix_helper(cm, classes,
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45)
     plt.yticks(tick_marks, classes)
-
+    
+    print "============================ Confusion Matrix ============================"
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
         print("Normalized confusion matrix")
@@ -27,6 +28,8 @@ def plot_confusion_matrix_helper(cm, classes,
         print('Confusion matrix, without normalization')
 
     print(cm)
+    print "=========================================================================="
+
 
     thresh = cm.max() / 2.
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
@@ -40,6 +43,7 @@ def plot_confusion_matrix_helper(cm, classes,
 
 
 def plot_confusion_matrix(y_true, y_pred, classes, title='Confusion Matrix'):
+	print title
 	cnf_matrix = confusion_matrix(y_true, y_pred)
 	plt.figure()
 	plot_confusion_matrix_helper(cnf_matrix, classes=classes, title=title)

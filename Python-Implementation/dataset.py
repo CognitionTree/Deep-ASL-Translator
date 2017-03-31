@@ -43,6 +43,9 @@ class Dataset(object):
 	def get_path(self):
 		return self.path
 	
+	def get_gloss_to_numb(self):
+		return self.gloss_to_number
+		
 	def get_view_point(self):
 		return self.view_point
 	
