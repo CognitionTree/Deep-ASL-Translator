@@ -79,6 +79,7 @@ print("Batch size: ", batch_size)
 
 print("============================== Model Summary ==============================")
 model.summary()
+
 print("================================ Training: ================================")
 
 #Train model
