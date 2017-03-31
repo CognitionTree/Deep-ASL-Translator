@@ -31,7 +31,6 @@ def get_words(videos_directory):
 	return words
 
 def get_all_videos_paths(videos_directory, words, camera_views):
-	#List containing all path for all videos in the dataset
 	all_videos_paths = []
 	
 	for word in words:
@@ -39,6 +38,16 @@ def get_all_videos_paths(videos_directory, words, camera_views):
 			all_videos_paths += glob.glob(videos_directory + '/' + word + '/' + view + '/*.mp4')
 	
 	return all_videos_paths
+
+def get_all_frames_paths(frames_directory, words, camera_views):
+	all_frames_paths = []
+	
+	for word in words:
+		for view in camera_views:
+			directory_names = glob.glob(frames_directory + '/' + word + '/' + view + '/*')
+			for directory in directory_names:
+				all_frames_paths += glob.glob(directory + '/*.jpg')
+	return all_frames_paths
 
 def read_and_save_all_frames(all_videos_paths, frames_directory, crop_height):
 	video_information_matrix = []
@@ -146,8 +155,10 @@ def compute_optical_flow(input_video_path, output_image_path, crop_height):
 def get_optical_flow_images(all_videos_paths, optical_flow_directory, crop_height):
 	video_number = 1
 	for video_path in all_videos_paths:
+		
 		print "video: ", video_number, "/", len(all_videos_paths)
 		video_number += 1
+		
 		directory_name = video_path.split('.')[0]
 		split_directory_name = directory_name.split('/')
 		video_name = split_directory_name[-1]
@@ -156,19 +167,51 @@ def get_optical_flow_images(all_videos_paths, optical_flow_directory, crop_heigh
 		
 		output_image_path = optical_flow_directory + '/' + word + '/' + view + '/' + video_name + '.png'
 		compute_optical_flow(video_path,output_image_path, crop_height)
-	
 
+def compute_SIFT_image(frame_path, output_image_path):
+	img = cv2.imread(frame_path)
+	grayscale= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+	sift = cv2.SIFT() #.SIFT_create()
+	kp, des = sift.detectAndCompute(grayscale,None)
+	cv2.imwrite(output_image_path, des)
+	
+def get_SIFT_all_images(all_frames_paths, frames_SIFT_directory):
+	frame_number = 1
+	for frame_path in all_frames_paths:
+		print "frame_path"
+		print frame_path
+		print "frame: ", frame_number, "/", len(all_frames_paths)
+		frame_number += 1
+		
+		directory_name = frame_path.split('.')[0]
+		split_directory_name = directory_name.split('/')
+		frame_name = split_directory_name[-1]
+		video_name = split_directory_name[-2]
+		view = split_directory_name[-3]
+		word = split_directory_name[-4]
+		
+		output_directory = frames_SIFT_directory + '/' + word + '/' + view + '/' + video_name
+		output_image_path = output_directory + '/' + frame_name + '.png'
+		
+		if not os.path.exists(output_directory):
+			os.makedirs(output_directory)
+		
+		compute_SIFT_image(frame_path, output_image_path) #This saves the descriptor as an image
+	
 #-----------------main-----------------
 videos_directory = '/Users/danielaflorit/Github/ASL_Dataset/Videos'
 frames_directory = '/Users/danielaflorit/Github/ASL_Dataset/Frames'
 testing_directory = '/Users/danielaflorit/Github/ASL_Dataset/Testing'
 augmented_frames_directory = '/Users/danielaflorit/Github/ASL_Dataset/Frames_augmented'
 optical_flow_directory = '/Users/danielaflorit/Github/ASL_Dataset/Optical_flow'
+frames_SIFT_directory = '/Users/danielaflorit/Github/ASL_Dataset/Frames_SIFT'
 
 camera_views = ['Face', 'Front', 'Side']
 camera_views_single = ['Front'] 
 words_list = get_words(videos_directory)
+
 all_videos_paths = get_all_videos_paths(videos_directory, words_list, camera_views)
+all_frames_paths = get_all_frames_paths(frames_directory, words_list, camera_views)
 
 ########################################
 #Uncomment to call finding_crop_size()
@@ -177,10 +220,15 @@ crop_height = 242 #this was found using the function above
 
 ########################################
 #Split all videos by frame and crop the bottom section out
-#read_and_save_all_frames(all_videos_paths, frames_directory, crop_height)
+read_and_save_all_frames(all_videos_paths, frames_directory, crop_height)
 
 ########################################
 #Compute all optical flow images:
 create_empty_folders(optical_flow_directory, words_list, camera_views)
 get_optical_flow_images(all_videos_paths, optical_flow_directory, crop_height)
-	
+
+########################################
+#Compute all SIFT images:
+get_SIFT_all_images(all_frames_paths, frames_SIFT_directory)
+
+
