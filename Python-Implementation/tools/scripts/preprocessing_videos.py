@@ -197,6 +197,39 @@ def get_SIFT_all_images(all_frames_paths, frames_SIFT_directory):
 			os.makedirs(output_directory)
 		
 		compute_SIFT_image(frame_path, output_image_path) #This saves the descriptor as an image
+
+def compute_HoG_image(frame_path, output_image_path):
+	#This method is already computing HoG, we need to decide how to use it
+	
+	img = cv2.imread(frame_path)
+	#grayscale= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+	
+	hog = cv2.HOGDescriptor()
+	h = hog.compute(img)
+	
+def get_HoG_all_images(all_frames_paths, freames_HoG_directory):
+	frame_number = 1
+	for frame_path in all_frames_paths:
+		print "frame_path"
+		print frame_path
+		print "frame: ", frame_number, "/", len(all_frames_paths)
+		frame_number += 1
+		
+		directory_name = frame_path.split('.')[0]
+		split_directory_name = directory_name.split('/')
+		frame_name = split_directory_name[-1]
+		video_name = split_directory_name[-2]
+		view = split_directory_name[-3]
+		word = split_directory_name[-4]
+		
+		output_directory = freames_HoG_directory + '/' + word + '/' + view + '/' + video_name
+		output_image_path = output_directory + '/' + frame_name + '.png'
+		
+		if not os.path.exists(output_directory):
+			os.makedirs(output_directory)
+		
+		compute_HoG_image(frame_path, output_image_path) #This saves the descriptor as an image
+
 	
 #-----------------main-----------------
 videos_directory = '/Users/danielaflorit/Github/ASL_Dataset/Videos'
@@ -205,6 +238,7 @@ testing_directory = '/Users/danielaflorit/Github/ASL_Dataset/Testing'
 augmented_frames_directory = '/Users/danielaflorit/Github/ASL_Dataset/Frames_augmented'
 optical_flow_directory = '/Users/danielaflorit/Github/ASL_Dataset/Optical_flow'
 frames_SIFT_directory = '/Users/danielaflorit/Github/ASL_Dataset/Frames_SIFT'
+freames_HoG_directory = '/Users/danielaflorit/Github/ASL_Dataset/Frames_HoG'
 
 camera_views = ['Face', 'Front', 'Side']
 camera_views_single = ['Front'] 
@@ -228,7 +262,13 @@ create_empty_folders(optical_flow_directory, words_list, camera_views)
 get_optical_flow_images(all_videos_paths, optical_flow_directory, crop_height)
 
 ########################################
-#Compute all SIFT images:
+Compute all SIFT images:
 get_SIFT_all_images(all_frames_paths, frames_SIFT_directory)
+
+########################################
+Compute all SIFT images:
+get_HoG_all_images(all_frames_paths, freames_HoG_directory)
+
+
 
 
