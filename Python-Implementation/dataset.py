@@ -35,10 +35,7 @@ class Dataset(object):
 					print sign
 				if sign.get_gloss() not in self.gloss_to_number:
 					self.gloss_to_number[sign.get_gloss()] = i
-					i += 1
-					
-			#if i == 3:
-				#break	
+					i += 1	
 				
 	def get_path(self):
 		return self.path

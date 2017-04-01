@@ -41,7 +41,6 @@ class Sign(object):
 	def get_frame_at(self, pos):
 		return self.frames[pos]
 	
-	
 	def get_frame_matrix_at(self, pos):
 		return self.frames[pos].get_frame()
 	
