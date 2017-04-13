@@ -243,6 +243,7 @@ freames_HoG_directory = '/Users/danielaflorit/Github/ASL_Dataset/Frames_HoG'
 camera_views = ['Face', 'Front', 'Side']
 camera_views_single = ['Front'] 
 words_list = get_words(videos_directory)
+print words_list
 
 all_videos_paths = get_all_videos_paths(videos_directory, words_list, camera_views)
 all_frames_paths = get_all_frames_paths(frames_directory, words_list, camera_views)
@@ -250,24 +251,24 @@ all_frames_paths = get_all_frames_paths(frames_directory, words_list, camera_vie
 ########################################
 #Uncomment to call finding_crop_size()
 #finding_crop_size(videos_directory)
-crop_height = 242 #this was found using the function above
+#crop_height = 242 #this was found using the function above
 
 ########################################
 #Split all videos by frame and crop the bottom section out
-read_and_save_all_frames(all_videos_paths, frames_directory, crop_height)
+#read_and_save_all_frames(all_videos_paths, frames_directory, crop_height)
 
 ########################################
 #Compute all optical flow images:
-create_empty_folders(optical_flow_directory, words_list, camera_views)
-get_optical_flow_images(all_videos_paths, optical_flow_directory, crop_height)
+#create_empty_folders(optical_flow_directory, words_list, camera_views)
+#get_optical_flow_images(all_videos_paths, optical_flow_directory, crop_height)
 
 ########################################
-Compute all SIFT images:
-get_SIFT_all_images(all_frames_paths, frames_SIFT_directory)
+#Compute all SIFT images:
+#get_SIFT_all_images(all_frames_paths, frames_SIFT_directory)
 
 ########################################
-Compute all SIFT images:
-get_HoG_all_images(all_frames_paths, freames_HoG_directory)
+#Compute all SIFT images:
+#get_HoG_all_images(all_frames_paths, freames_HoG_directory)
 
 
 
