@@ -9,6 +9,9 @@ from keras.utils import plot_model
 from dataset import *
 from numpy import *
 from plotting_tools import *
+from keras import regularizers
+import matplotlib.pyplot as plt
+from utils import *
 
 #Split ratios
 train_frac = 0.75
@@ -16,7 +19,7 @@ val_frac = 0.05
 test_frac = 0.2
 
 #Dataset path  --> Need to modify this
-dataset_path = '/Users/danielaflorit/Github/ASL_Dataset/Optical_flow'
+dataset_path = '/home/andy/Datasets/ASL/Optical_flow'
 
 #Getting train, validation and test data
 dataset = Dataset(dataset_path)
@@ -24,14 +27,14 @@ dataset = Dataset(dataset_path)
 
 #Model parameters
 num_classes = dataset.get_numb_classes()
-n_epochs = 1
+n_epochs = 100
 batch_size = 10
 pool_size = (2, 2)
 kernel_size = (3,3)
 
 #Names:
-model_name = 'conv_model.png'
-cm_name = 'Confusion Matrix Of Experiment Conv model with Optical Flow'
+model_name = 'conv_model_no_dropout.png'
+cm_name = 'Confusion Matrix Conv No Final Dropout'
 
 print(X_train.shape, 'train samples')
 print(X_val.shape, 'val samples')
@@ -58,26 +61,21 @@ model = Sequential()
 
 model.add(Conv2D(32, kernel_size, padding='same',input_shape=input_shape))
 model.add(Activation('relu'))
-model.add(Conv2D(32, kernel_size))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=pool_size))
 model.add(Dropout(0.25))
-
 model.add(Conv2D(64, kernel_size, padding='same'))
-model.add(Activation('relu'))
-model.add(Conv2D(64, kernel_size))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=pool_size))
 model.add(Dropout(0.25))
 
 model.add(Flatten())
-model.add(Dense(512))
+model.add(Dense(512, kernel_regularizer=regularizers.l2(0.01)))
 model.add(Activation('relu'))
-model.add(Dropout(0.5))
-model.add(Dense(num_classes))
+model.add(Dropout(0.25))
+model.add(Dense(num_classes, kernel_regularizer=regularizers.l2(0.01)))
+model.add(Dropout(0.25))
 model.add(Activation('softmax'))
 
-model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 print("============================ Model Parameters ============================")
 print("Kernel Size: ", kernel_size)
@@ -92,7 +90,7 @@ model.summary()
 print("================================ Training: ================================")
 #Train model
 print("Training:")
-model.fit(X_train, y_train, batch_size=batch_size, epochs=n_epochs, verbose=1, validation_data=(X_val, y_val), shuffle=True)
+history = model.fit(X_train, y_train, batch_size=batch_size, epochs=n_epochs, verbose=1, validation_data=(X_val, y_val), shuffle=True)
 
 #Test model
 print("=========================== Evaluating Model: ===========================")
@@ -103,7 +101,7 @@ print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
 #Plotting model
-#plot_model(model, to_file=model_name, show_shapes=True, show_layer_names=True)
+plot_model(model, to_file=model_name, show_shapes=True, show_layer_names=True)
 
 print("=========================== Predicting Labels: ===========================")
 #Checking predictions
@@ -121,3 +119,26 @@ print("============================ Confusion Matrix ===========================
 build_confusion_matrix(y_test_label, predictions, range(dataset.get_numb_classes()), title=cm_name)
 #display_feature_vectors(feature_vectors, y_test_label, predictions)
 print("==========================================================================")
+
+
+save_keras_mode('conv_model', model)
+
+# list all data in history
+print(history.history.keys())
+# summarize history for accuracy
+plt.plot(history.history['acc'])
+print(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+# summarize history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
