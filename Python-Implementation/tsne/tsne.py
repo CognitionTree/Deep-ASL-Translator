@@ -13,6 +13,7 @@
 
 import numpy as Math
 import pylab as Plot
+import matplotlib.pyplot as plt 
 
 def Hbeta(D = Math.array([]), beta = 1.0):
 	"""Compute the perplexity and the P-row for a specific value of the precision of a Gaussian distribution."""
@@ -165,7 +166,8 @@ def tsne(X = Math.array([]), no_dims = 2, initial_dims = 50, perplexity = 30.0):
 
 
 if __name__ == "__main__":
-	image_dataset = {14:'CAR', 6:'FINISH', 10:'FUTURE', 3:'LIKE', 'THAT': 12, 'HOUSE': 11, 'MOTHER': 9, 'DEAF': 4, 'YESTERDAY': 17, 'BUT': 0, 'CHOCOLATE': 5, 'SEE': 13, 'BUY': 7, 'KNOW': 1, 'IN': 2, 'NOT': 16, 'SAME': 8, 'WHO': 15, 'BOOK': 19, 'REALLY': 18}
+	numb_to_lab = {14:'CAR', 6:'FINISH', 10:'FUTURE', 3:'LIKE', 12:'THAT', 11:'HOUSE', 9:'MOTHER', 4:'DEAF', 17:'YESTERDAY', 0:'BUT', 5:'CHOCOLATE', 13:'SEE', 7:'BUY', 1:'KNOW', 2:'IN', 16:'NOT', 8:'SAME', 15:'WHO', 19:'BOOK', 18:'REALLY'}
+	numb_to_color = {14:'b', 6:'k', 10:'gold', 3:'pink', 12:'indigo', 11:'r', 9:'m', 4:'lime', 17:'hotpink', 0:'aqua', 5:'grey', 13:'y', 7:'cyan', 1:'orchid', 2:'magenta', 16:'salmon', 8:'teal', 15:'maroon', 19:'purple', 18:'tomato'}
 
 	print "Run Y = tsne.tsne(X, no_dims, perplexity) to perform t-SNE on your dataset."
 	print "Running example on 2,500 MNIST digits..."
@@ -173,5 +175,25 @@ if __name__ == "__main__":
 	labels = Math.load("l.npy");
 	Y = tsne(X, 2, 50, 20.0);
 
-	Plot.scatter(Y[:,0], Y[:,1], 20, labels);
-	Plot.show();
+	d= {}
+	xs= Y[:,0]
+	ys=Y[:,1]
+	for i in range(len(xs)):
+		lab=labels[i]
+		if lab in d:
+			d[lab][0].append(xs[i])
+			d[lab][1].append(ys[i])
+		else:
+			d[lab] = [[xs[i]],[ys[i]]]
+			
+	lab_plots = [[],[]]
+	for lab in d:
+		lab_plots[0].append(numb_to_lab[lab])
+		#lab_plots[1].append(plt.scatter(d[lab][0], d[lab][1], marker='x', color=numb_to_color[lab]))
+		lab_plots[1].append(plt.scatter(d[lab][0], d[lab][1], color=numb_to_color[lab]))
+	plt.legend(lab_plots[1], lab_plots[0], scatterpoints=1,loc=1, ncol=5, fontsize=8)
+	plt.show()	
+	#plt.save()
+	#Plot.scatter(Y[:,0], Y[:,1], 20, labels);
+	#Plot.show();
+	
