@@ -4,6 +4,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential, model_from_json
 from keras.layers import Dense, Dropout, Activation, Flatten, Conv2D, MaxPooling2D, TimeDistributed, GlobalAveragePooling1D, GlobalMaxPooling1D, LSTM
 from keras.utils import plot_model
+from keras.metrics import top_k_categorical_accuracy
 from image_dataset import *
 from video_dataset import *
 from numpy import *
@@ -29,17 +30,26 @@ def evaluation(model, history, X_test, y_test, num_classes, model_image, cm_name
 	
 	print("=========================== Evaluation Metrics ===========================")
 	print('Test loss:', score[0])
-	print('Test accuracy:', score[1])
+	print('Test accuracy Top 1:', score[1])
+	print('Test accuracy Top 2:', score[2])
+	print('Test accuracy Top 3:', score[3])
+	print('Test accuracy Top 4:', score[4])
 	
 	#Checking predictions
 	print("=========================== Predicting Labels: ===========================")
 	predictions = model.predict_classes(X_test)
+	save('results/'+model_name+'_predictions',array(predictions))	
+
+	print("=========================== Compute Feature Vectors: ===========================")
+	feature_vectors = model.predict(X_test)	
+	save('results/'+model_name+'_feature_vectors',array(feature_vectors))	
 
 	#Changing y_test to its label for confussion matrix
 	y_test_label = []
 	for y in y_test:
 		y_test_label.append(argmax(y))
 
+	save('results/'+model_name+'_labels',array(y_test_label))
 	#Building Confusion Matrix
 	print("============================ Confusion Matrix ============================")
 	build_confusion_matrix(y_test_label, predictions, range(num_classes), title=cm_name)
@@ -49,14 +59,70 @@ def evaluation(model, history, X_test, y_test, num_classes, model_image, cm_name
 	plot_model(model, to_file=model_image, show_shapes=True, show_layer_names=True)
 
 
-	#summarize history for accuracy 
+	#Sumarizing All Training Accuracies
+	plt.plot(history.history['acc'])
+	plt.plot(history.history['<lambda>_1'])
+	plt.plot(history.history['<lambda>_2'])
+	plt.plot(history.history['<lambda>_3'])
+	plt.title('model training accuracies')
+	plt.ylabel('accuracy')
+	plt.xlabel('epoch')
+	plt.legend(['acc top 1', 'acc top 2', 'acc top 3', 'acc top 4'], loc='upper left')
+	plt.savefig(acc_history_name+'training_all.png')
+	plt.close()
+	#Sumarizing All Validation Accuracies
+	plt.plot(history.history['val_acc'])
+	plt.plot(history.history['val_<lambda>_1'])
+	plt.plot(history.history['val_<lambda>_2'])
+	plt.plot(history.history['val_<lambda>_3'])
+	plt.title('model validation accuracies')
+	plt.ylabel('accuracy')
+	plt.xlabel('epoch')
+	plt.legend(['acc top 1', 'acc top 2', 'acc top 3', 'acc top 4'], loc='upper left')
+	plt.savefig(acc_history_name+'validation_all.png')
+	plt.close()
+
+	#summarize history for accuracy 1
 	plt.plot(history.history['acc'])
 	plt.plot(history.history['val_acc'])
-	plt.title('model accuracy')
+	plt.title('model accuracy top 1')
 	plt.ylabel('accuracy')
 	plt.xlabel('epoch')
 	plt.legend(['train', 'val'], loc='upper left')
-	plt.savefig(acc_history_name)
+	plt.savefig(acc_history_name+'1.png')
+	plt.close()
+
+
+	#summarize history for accuracy 2
+	plt.plot(history.history['<lambda>_1'])
+	plt.plot(history.history['val_<lambda>_1'])
+	plt.title('model accuracy top 2')
+	plt.ylabel('accuracy')
+	plt.xlabel('epoch')
+	plt.legend(['train', 'val'], loc='upper left')
+	plt.savefig(acc_history_name+'2.png')
+	plt.close()
+
+
+	#summarize history for accuracy 3
+	plt.plot(history.history['<lambda>_2'])
+	plt.plot(history.history['val_<lambda>_2'])
+	plt.title('model accuracy top 3')
+	plt.ylabel('accuracy')
+	plt.xlabel('epoch')
+	plt.legend(['train', 'val'], loc='upper left')
+	plt.savefig(acc_history_name+'3.png')
+	plt.close()
+
+
+	#summarize history for accuracy 4 
+	plt.plot(history.history['<lambda>_3'])
+	plt.plot(history.history['val_<lambda>_3'])
+	plt.title('model accuracy top 4')
+	plt.ylabel('accuracy')
+	plt.xlabel('epoch')
+	plt.legend(['train', 'val'], loc='upper left')
+	plt.savefig(acc_history_name+'4.png')
 	plt.close()
 
 	#summarize history for loss
@@ -70,7 +136,7 @@ def evaluation(model, history, X_test, y_test, num_classes, model_image, cm_name
 	plt.close()
 
 	#Saving Results and history
-	test_accuracy = array([score[1]], dtype=object)
+	test_accuracy = array([score[1], score[2], score[3], score[4]], dtype=object)
 	test_loss = array([score[0]], dtype=object)
 	test_labels=array(y_test_label, dtype=object)
 	test_predictions=array(predictions, dtype=object)
@@ -79,8 +145,20 @@ def evaluation(model, history, X_test, y_test, num_classes, model_image, cm_name
 	history_train_loss = array(history.history['loss'], dtype=object)
 	history_val_accuracy = array(history.history['val_acc'], dtype=object)
 	history_val_loss = array(history.history['val_loss'], dtype=object)
+
+
+	#['acc', 'loss', '<lambda>_2', '<lambda>_3', '<lambda>_1', 'val_<lambda>_2', 'val_<lambda>_3', 'val_<lambda>_1', 'val_acc', 'val_loss']
+	history_train_accuracy_2 = array(history.history['<lambda>_1'], dtype=object)
+	history_train_accuracy_3 = array(history.history['<lambda>_2'], dtype=object)
+	history_train_accuracy_4 = array(history.history['<lambda>_3'], dtype=object)
+		
+	history_val_accuracy_2 = array(history.history['val_<lambda>_1'], dtype=object)
+	history_val_accuracy_3 = array(history.history['val_<lambda>_2'], dtype=object)
+	history_val_accuracy_4 = array(history.history['val_<lambda>_3'], dtype=object)
 	
-	savemat(mat_file, mdict={'test_acc': test_accuracy, 'test_loss':test_loss, 'test_labels':test_labels, 'test_pred':test_predictions, 'history_train_acc':history_train_accuracy, 'history_train_loss':history_train_loss, 'history_val_loss':history_val_loss, 'history_val_acc':history_train_accuracy, 'parameters':parameters})
+	feature_vectors = array(feature_vectors, dtype=object)
+
+	savemat(mat_file, mdict={'test_acc': test_accuracy, 'test_loss':test_loss, 'test_labels':test_labels, 'test_pred':test_predictions, 'history_train_acc1':history_train_accuracy, 'history_train_acc2':history_train_accuracy_2, 'history_train_acc3':history_train_accuracy_3, 'history_train_acc4':history_train_accuracy_4,'history_train_loss':history_train_loss, 'history_val_loss':history_val_loss, 'history_val_acc1':history_train_accuracy, 'history_val_acc2':history_val_accuracy_2,'history_val_acc3':history_val_accuracy_3, 'history_val_acc4':history_val_accuracy_4,'parameters':parameters, 'feature_vectors':feature_vectors})
 	#TODO TSNE
 
 
@@ -108,14 +186,18 @@ def conv_model(input_shape, num_classes, kernel_size = (3,3), pool_size = (2, 2)
 	model.add(Dropout(0.25))
 	model.add(Activation('softmax'))
 
-	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+	top2 = lambda x,y: top_k_categorical_accuracy(x,y,k=2)
+	top3 = lambda x,y: top_k_categorical_accuracy(x,y,k=3)
+	top4 = lambda x,y: top_k_categorical_accuracy(x,y,k=4)
+
+	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', top2, top3, top4])
 	return model
 
 
 def run_conv_model(model_name, train_frac=0.75, val_frac=0.05, test_frac=0.2, kernel_size = (3,3), pool_size = (2, 2), n_epochs = 100, batch_size = 10, dataset_path='/home/andy/Datasets/ASL/Optical_flow'):
 	model_image = 'model_images/'+model_name+'.png'
 	cm_name = model_name + ' Confusion Matrix'
-	acc_history_name = 'results/' + model_name + '_accuracy_history.png'
+	acc_history_name = 'results/' + model_name + '_accuracy_history'
 	loss_history_name = 'results/' + model_name + '_loss_history.png'
 	mat_file = 'results/' + model_name + '.mat'
 
@@ -172,7 +254,7 @@ def run_conv_model(model_name, train_frac=0.75, val_frac=0.05, test_frac=0.2, ke
 	#Training the model to fit dataset
 	print("================================ Training: ================================")
 	history = model.fit(X_train, y_train, batch_size=batch_size, epochs=n_epochs, verbose=1, validation_data=(X_val, y_val), shuffle=True)
-	
+	print(history.history.keys())
 	parameters = array([train_frac, val_frac, test_frac, kernel_size[0], pool_size[0], n_epochs, batch_size], dtype=object)
 	evaluation(model, history, X_test, y_test, num_classes, model_image, cm_name, acc_history_name, loss_history_name, mat_file, parameters, model_name)
 
@@ -208,7 +290,11 @@ def lstm_model(input_shape_conv, time_distributed_input_shape, num_classes, kern
 	model.add(Dropout(0.25))
 	model.add(Activation('softmax'))
 
-	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+	top2 = lambda x,y: top_k_categorical_accuracy(x,y,k=2)
+	top3 = lambda x,y: top_k_categorical_accuracy(x,y,k=3)
+	top4 = lambda x,y: top_k_categorical_accuracy(x,y,k=4)
+
+	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', top2, top3, top4])
 	return model
 
 
@@ -217,7 +303,7 @@ def lstm_model(input_shape_conv, time_distributed_input_shape, num_classes, kern
 def run_lstm_model(model_name, train_frac=0.75, val_frac=0.05, test_frac=0.2, kernel_size = (3,3), pool_size = (2, 2), n_epochs = 100, batch_size = 10, dataset_path='/home/andy/Datasets/ASL/Pair_Optical_flow', mode=None, numb_groups=35):
 	model_image = 'model_images/'+model_name+'.png'
 	cm_name = model_name + ' Confusion Matrix'
-	acc_history_name = 'results/' + model_name + '_accuracy_history.png'
+	acc_history_name = 'results/' + model_name + '_accuracy_history'
 	loss_history_name = 'results/' + model_name + '_loss_history.png'
 	mat_file = 'results/' + model_name + '.mat'
 
@@ -282,7 +368,3 @@ def run_lstm_model(model_name, train_frac=0.75, val_frac=0.05, test_frac=0.2, ke
 	
 	parameters = array([train_frac, val_frac, test_frac, kernel_size[0], pool_size[0], n_epochs, batch_size, numb_groups], dtype=object)
 	evaluation(model, history, X_test, y_test, num_classes, model_image, cm_name, acc_history_name, loss_history_name, mat_file, parameters, model_name)
-
-
-
-
