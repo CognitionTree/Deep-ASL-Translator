@@ -368,3 +368,171 @@ def run_lstm_model(model_name, train_frac=0.75, val_frac=0.05, test_frac=0.2, ke
 	
 	parameters = array([train_frac, val_frac, test_frac, kernel_size[0], pool_size[0], n_epochs, batch_size, numb_groups], dtype=object)
 	evaluation(model, history, X_test, y_test, num_classes, model_image, cm_name, acc_history_name, loss_history_name, mat_file, parameters, model_name)
+
+
+
+
+
+def find_greater_value_key(dictionary):
+	max_key = None
+	max_value = -1
+	
+	for key in dictionary:
+		if dictionary[key] > max_value:
+			max_key = key
+			max_value = dictionary[key]
+	return max_key
+
+
+
+
+def run_bias_model(model_name, train_frac=0.75, val_frac=0.05, test_frac=0.2, dataset_path='/home/andy/Datasets/ASL/Optical_flow'):
+	model_image = 'model_images/'+model_name+'.png'
+	cm_name = model_name + ' Confusion Matrix'
+	mat_file = 'results/' + model_name + '.mat'
+
+	#Getting train, validation and test data
+	dataset = Image_Dataset(dataset_path)
+	((X_train, y_train),(X_val, y_val),(X_test, y_test)) = dataset.get_data_split(train_frac, val_frac, test_frac)
+	
+	#Model parameters
+	num_classes = dataset.get_numb_classes()
+	
+	
+	#Printin Model Information
+	print("============================ Model Information ============================")
+	print('Model Name: ', model_name)
+	print('Model Image File Name: ', model_image)
+	print('Confusion Matrix Name: ', cm_name)
+	print("Number of classes: ", num_classes)
+
+
+	#predictions
+	print("============================ Making Predictions ============================")
+	count = {}
+	for y in y_test:
+		if y in count:
+			count[y] += 1
+		else:
+			count[y] = 1
+
+	
+	top_1_pred = find_greater_value_key(count)	
+	del count[top_1_pred]
+	top_2_pred = find_greater_value_key(count)
+	del count[top_2_pred]
+	top_3_pred = find_greater_value_key(count)
+	del count[top_3_pred]
+	top_4_pred = find_greater_value_key(count)
+
+	top_1_pred = [top_1_pred]*len(y_test)
+	top_2_pred = [top_2_pred]*len(y_test)
+	top_3_pred = [top_3_pred]*len(y_test)
+	top_4_pred = [top_4_pred]*len(y_test)
+
+	top_4_acc = [0.0,0.0,0.0,0.0]
+
+	for i in range(len(y_test)):
+		if y_test[i] == top_1_pred[i]:
+			top_4_acc[0]+=1
+			top_4_acc[1]+=1			 
+		 	top_4_acc[2]+=1
+			top_4_acc[3]+=1
+		elif y_test[i] == top_2_pred[i]:
+			top_4_acc[1]+=1			 
+		 	top_4_acc[2]+=1
+			top_4_acc[3]+=1
+		elif y_test[i] == top_3_pred[i]:			 
+		 	top_4_acc[2]+=1
+			top_4_acc[3]+=1
+		elif y_test[i] == top_4_pred[i]:			 
+			top_4_acc[3]+=1
+
+	top_4_acc = array(top_4_acc)/len(y_test) 
+
+	print("============================ Confusion Matrix ============================")
+	build_confusion_matrix(y_test, top_1_pred, range(num_classes), title=cm_name)
+
+	print("============================ Top 4 Accuracies ============================")
+	print(top_4_acc)
+	
+	acc = array(top_4_acc, dtype=object)
+
+	savemat(mat_file, mdict={'bias_acc': acc})
+
+
+
+
+
+
+
+def run_temp_conv_model(model_name, train_frac=0.75, val_frac=0.05, test_frac=0.2, kernel_size = (3,3), pool_size = (2, 2), n_epochs = 100, batch_size = 10, dataset_path='/home/andy/Datasets/ASL/Pair_Optical_flow'):
+	model_image = 'model_images/'+model_name+'.png'
+	cm_name = model_name + ' Confusion Matrix'
+	acc_history_name = 'results/' + model_name + '_accuracy_history'
+	loss_history_name = 'results/' + model_name + '_loss_history.png'
+	mat_file = 'results/' + model_name + '.mat'
+
+	#Getting train, validation and test data
+	dataset = Video_Dataset(dataset_path)
+	(X_train, y_train), (X_val, y_val),(X_test, y_test) = dataset.get_data_split(train_frac=train_frac, val_frac=val_frac, test_frac=test_frac, numb_groups=5, is_videos=False)	
+
+	#Model parameters
+	num_classes = dataset.get_numb_classes()
+
+	#del dataset
+
+	#Preprocessing
+	numb_images, img_rows, img_cols, img_channels  = X_train.shape
+	input_shape = (img_rows, img_cols, img_channels)
+
+	X_train = X_train.astype('float32')
+	X_val = X_val.astype('float32')
+	X_test = X_test.astype('float32')
+
+	X_train /= 255
+	X_test /= 255
+	X_val /= 255
+
+	y_train = keras.utils.to_categorical(y_train, num_classes)
+	y_val = keras.utils.to_categorical(y_val, num_classes)
+	y_test = keras.utils.to_categorical(y_test, num_classes)
+
+
+	#Building the model
+	model = conv_model(input_shape, num_classes, kernel_size, pool_size)
+
+	#Printing Model Information
+	print("============================ Model Summary ============================")
+	model.summary()
+
+	print("============================ Model Information ============================")
+	print('Model Name: ', model_name)
+	print('Model Image File Name: ', model_image)
+	print('Confusion Matrix Name: ', cm_name)
+	print("Kernel Size: ", kernel_size)
+	print("Pooling size: ", pool_size)
+	print("Number of epochs: ", n_epochs)
+	print("Batch size: ", batch_size)
+	print("Number of classes: ", num_classes)
+
+	print("============================ Input Shapes ============================")
+	print(X_train.shape, ' input train samples')
+	print(X_val.shape, ' input val samples')
+	print(X_test.shape, ' input test samples')
+	print(y_train.shape, ' label train samples')
+	print(y_val.shape, ' label val samples')
+	print(y_test.shape, ' label test samples')
+	
+
+	#Training the model to fit dataset
+	print("================================ Training: ================================")
+	history = model.fit(X_train, y_train, batch_size=batch_size, epochs=n_epochs, verbose=1, validation_data=(X_val, y_val), shuffle=True)
+	print(history.history.keys())
+	parameters = array([train_frac, val_frac, test_frac, kernel_size[0], pool_size[0], n_epochs, batch_size], dtype=object)
+	evaluation(model, history, X_test, y_test, num_classes, model_image, cm_name, acc_history_name, loss_history_name, mat_file, parameters, model_name)
+
+
+
+
+

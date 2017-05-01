@@ -55,14 +55,19 @@ class Video_Dataset(object):
 	def get_sign_at(self, pos):
 		return self.signs[pos]
 	
-	def get_signs_matrix(self, numb_groups=36):
+	def get_signs_matrix(self, numb_groups=36, is_m1=True):
 		matrix = []
 		for sign in self.signs:
-			sign_matrix = sign.get_reduced_frames_matrix(numb_groups)
-			#for frame in sign.get_frames_matrices():
-				#sign_matrix.append(frame)
+			sign_matrix = None
+			if is_m1:
+				sign_matrix = sign.get_reduced_frames_matrix(numb_groups)
+			else:
+				sign_matrix = sign.get_reduced_frames_matrix2(numb_groups)
 			matrix.append(sign_matrix)
+		#print('++++++++++++++++++++++++++++++++++++++++++++++++')
+		print(array(matrix).shape)
 		return matrix
+
 	
 	def shuffle_dataset(self):
 		shuffle(self.signs)
@@ -83,7 +88,7 @@ class Video_Dataset(object):
 				map_gloss_sign[cur_gloss] = [cur_sign]
 		return map_gloss_sign
 	
-	def get_data_split(self, train_frac=0.75, val_frac=0.05, test_frac=0.2, numb_groups=36):		
+	def get_data_split(self, train_frac=0.75, val_frac=0.05, test_frac=0.2, numb_groups=36, is_videos=True):		
 
 		X_train = []
 		y_train = []
@@ -93,8 +98,12 @@ class Video_Dataset(object):
 
 		X_val = []
 		y_val = []
-	
-		signs_matrix = self.get_signs_matrix(numb_groups)
+		
+		signs_matrix = None
+		if is_videos:	
+			signs_matrix = self.get_signs_matrix(numb_groups)
+		else:
+			signs_matrix = self.get_signs_matrix(numb_groups, False)
 		#organize dataset by gloss
 		map_gloss_sign = self.organize_signs_by_gloss()
 		
@@ -130,7 +139,31 @@ class Video_Dataset(object):
 		y_test = np.array(y_test)
 		X_val = np.array(X_val)
 		y_val = np.array(y_val)
-		return (X_train, y_train), (X_val, y_val),(X_test, y_test)
+
+
+		if not is_videos:
+			X_train = self.reduce_videos_to_images_with_temp(X_train)
+			X_val = self.reduce_videos_to_images_with_temp(X_val)
+			X_test = self.reduce_videos_to_images_with_temp(X_test)
+			return (X_train, y_train), (X_val, y_val),(X_test, y_test)
+		else:
+			return (X_train, y_train), (X_val, y_val),(X_test, y_test)
+
+	
+	def reduce_videos_to_images_with_temp(self, Vs):
+		Is = []
+		for V in Vs:
+			Is.append(self.reduce_video_to_image_with_temp(V))
+		return array(Is)
+
+	def reduce_video_to_image_with_temp(self, V):
+		I = zeros(V[0].shape)
+
+		for i in range(len(V)):
+			I += (i+1)*V[i]
+
+		I /= (1.0*len(V))
+		return I
 	
 	def get_numb_classes(self):
 		return len(self.gloss_to_number)

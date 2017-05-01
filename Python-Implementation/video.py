@@ -38,9 +38,10 @@ class Video(object):
 			frame_matrix.append(frame.get_img())
 		return frame_matrix
 
-	def get_reduced_frames_matrix(self, numb_groups):
-		frames_matrix = self.get_frames_matrix()
-		group_size = len(frames_matrix)/numb_groups
+	def get_reduced_frames_matrix(self, numb_groups, frames_matrix=None):
+		if frames_matrix == None:
+			frames_matrix = self.get_frames_matrix()
+		group_size = len(frames_matrix)/(numb_groups*1.0)
 		
 		reduced_frames_matrix = []
 		count = 1
@@ -87,3 +88,39 @@ class Video(object):
 	
 	def __len__(self):
 		return len(self.frames)
+
+
+
+
+	def get_reduced_frames_matrix2(self, numb_groups):
+		frames_matrix = array(self.get_frames_matrix())
+		frames_matrix.astype('float32')
+
+		#group_size = len(frames_matrix)/numb_groups
+		mean = frames_matrix.mean()		
+
+		reduced_frames_matrix = []
+		cur_composed_frame = zeros(frames_matrix[0].shape)
+
+		count = 1
+		for frame in frames_matrix:
+			cur_composed_frame += frame
+			
+			if cur_composed_frame.sum() >= mean:
+				reduced_frames_matrix.append(cur_composed_frame)
+				cur_composed_frame = zeros(frames_matrix[0].shape)
+				count =1
+			else:
+				count += 1
+ 
+		if count > 1:
+			reduced_frames_matrix[-1] += cur_composed_frame
+
+		if len(reduced_frames_matrix) < numb_groups:
+			reduced_frames_matrix += [reduced_frames_matrix[-1]] * (numb_groups-len(reduced_frames_matrix))
+			#print('If Video Shape------------------------------>:', array(reduced_frames_matrix).shape)
+		else:
+			reduced_frames_matrix = self.get_reduced_frames_matrix(numb_groups, reduced_frames_matrix)
+			#print('Else Video Shape------------------------------>:', array(reduced_frames_matrix).shape)
+		
+		return reduced_frames_matrix

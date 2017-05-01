@@ -34,8 +34,7 @@ class Image_Dataset(object):
 				else:
 					self.gloss_count[gloss] = 1.0
 					self.gloss_to_numb[gloss] = numb
-					numb+=1
-			 	
+					numb+=1	 	
 		
 		shuffle(self.signs)
 	
