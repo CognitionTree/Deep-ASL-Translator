@@ -19,6 +19,11 @@ def experiment_temp_conv():
 	model_name = 'Temp Convolutional Model 5 Groups'
 	run_temp_conv_model(model_name, train_frac=0.75, val_frac=0.05, test_frac=0.2, kernel_size = (3,3), pool_size = (2, 2), n_epochs = 100, batch_size = 10, dataset_path=pair_of_path)
 
+
+def experiment_random_agent(model_name='Random Model'):
+	run_random_model(model_name=model_name, train_frac=0.75, val_frac=0.05, test_frac=0.2, dataset_path='/home/andy/Datasets/ASL/Optical_flow')
+
+
 #Main
 #experiment_bias()
 #experiment_conv()
@@ -35,5 +40,6 @@ def experiment_temp_conv():
 #experiment_lstm('max', 15)
 #experiment_lstm('avg', 15)
 
-experiment_temp_conv()
+#experiment_temp_conv()
+experiment_random_agent()
 

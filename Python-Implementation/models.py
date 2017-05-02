@@ -12,7 +12,8 @@ from plotting_tools import *
 from keras import regularizers
 import matplotlib.pyplot as plt
 from scipy.io import *
-
+import random
+from copy import copy
 
 def save_keras_model(name, model):
 	trained_models_dir = 'trained_models/'
@@ -534,5 +535,85 @@ def run_temp_conv_model(model_name, train_frac=0.75, val_frac=0.05, test_frac=0.
 
 
 
+
+
+
+
+
+
+
+def run_random_model(model_name, train_frac=0.75, val_frac=0.05, test_frac=0.2, dataset_path='/home/andy/Datasets/ASL/Optical_flow'):
+	model_image = 'model_images/'+model_name+'.png'
+	cm_name = model_name + ' Confusion Matrix'
+	mat_file = 'results/' + model_name + '.mat'
+
+	#Getting train, validation and test data
+	dataset = Image_Dataset(dataset_path)
+	((X_train, y_train),(X_val, y_val),(X_test, y_test)) = dataset.get_data_split(train_frac, val_frac, test_frac)
+	
+	#Model parameters
+	num_classes = dataset.get_numb_classes()
+	
+	
+	#Printin Model Information
+	print("============================ Model Information ============================")
+	print('Model Name: ', model_name)
+	print('Model Image File Name: ', model_image)
+	print('Confusion Matrix Name: ', cm_name)
+	print("Number of classes: ", num_classes)
+
+
+	#predictions
+	print("============================ Making Predictions ============================")
+	posible_labels = list(set(y_test))
+
+	top_1_pred = []#[top_1_pred]*len(y_test)
+	top_2_pred = []#[top_2_pred]*len(y_test)
+	top_3_pred = []#[top_3_pred]*len(y_test)
+	top_4_pred = []#[top_4_pred]*len(y_test)
+
+	all_predictions = [top_1_pred, top_2_pred, top_3_pred, top_4_pred]
+
+	for i in range(len(y_test)):
+		temp_labs = copy(posible_labels)
+		for j in range(4):
+			pred = random.choice(temp_labs)
+			all_predictions[j].append(pred)
+			temp_labs.remove(pred)
+	
+	top_1_pred = all_predictions[0]
+	top_2_pred = all_predictions[1]
+	top_3_pred = all_predictions[2]
+	top_4_pred = all_predictions[3]
+
+	top_4_acc = [0.0,0.0,0.0,0.0]
+
+	for i in range(len(y_test)):
+		if y_test[i] == top_1_pred[i]:
+			top_4_acc[0]+=1
+			top_4_acc[1]+=1			 
+		 	top_4_acc[2]+=1
+			top_4_acc[3]+=1
+		elif y_test[i] == top_2_pred[i]:
+			top_4_acc[1]+=1			 
+		 	top_4_acc[2]+=1
+			top_4_acc[3]+=1
+		elif y_test[i] == top_3_pred[i]:			 
+		 	top_4_acc[2]+=1
+			top_4_acc[3]+=1
+		elif y_test[i] == top_4_pred[i]:			 
+			top_4_acc[3]+=1
+
+	top_4_acc = array(top_4_acc)/len(y_test) 
+
+	print("============================ Confusion Matrix ============================")
+	build_confusion_matrix(y_test, top_1_pred, range(num_classes), title=cm_name)
+
+	print("============================ Top 4 Accuracies ============================")
+	print(top_4_acc)
+	
+	acc = array(top_4_acc, dtype=object)
+
+	savemat(mat_file, mdict={'bias_acc': acc})
 
 
