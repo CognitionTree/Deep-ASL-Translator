@@ -41,6 +41,9 @@ Execute the following command: `python experiments.py agent` where agent can be 
 
 4. LSTM Model: This model instead of a cumulative optical flow of the entire video, uses a the optical flow of each pair of frames and combine them using an LSTM in order to learn temporal information. This agent can not be currently tested due to an issue uploading the data. It will be available soon.
 
+### Changing Hyperparameters
+Currently there is no way to input through the command line parameters such as the number of epoches,fractions to split the dataset, pooling and kernel sizes, model name among others. It is easy to change them by going to the file experiments.py and to the function of the specific agent and change the parameters in there. 
+
 ### Output
 1. The final total loss.
 
