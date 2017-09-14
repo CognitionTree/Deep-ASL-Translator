@@ -35,7 +35,7 @@ Execute the following command: `python experiments.py agent` where agent can be 
 
 2. Bias: It chooses the gloss with more repetitions.
 
-3. Convolutional Model: It is aconvolutional network trained using supervised learning. The input to the network is the cumulative optical flow of the video of the person performing a sign, the output is the gloss. In order to train the model categorical crossentropy loss was used and the weights were optimized using Adam optimizer.
+3. Convolutional Model: It is a convolutional network trained using supervised learning. The input to the network is the cumulative optical flow of the video of the person performing a sign, the output is the gloss. In order to train the model categorical crossentropy loss was used and the weights were optimized using Adam optimizer.
 
 ![Convolutional Model](https://github.com/CognitionTree/Deep-ASL-Translator/blob/master/Python-Implementation/model_images/Convolutional%20Model.png)
 
