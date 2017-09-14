@@ -8,7 +8,7 @@ pair_of_path = '/home/andy/Datasets/ASL/Pair_Optical_flow'
 def experiment_conv():
     model_name = 'Convolutional Model Top 4'
     run_conv_model(model_name, train_frac=0.75, val_frac=0.05, test_frac=0.2, kernel_size=(3, 3), pool_size=(2, 2),
-                   n_epochs=3, batch_size=10, dataset_path=of_path)
+                   n_epochs=100, batch_size=10, dataset_path=of_path)
 
 
 def experiment_lstm(mode, numb_groups):
