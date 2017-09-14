@@ -15,10 +15,14 @@ from scipy.io import *
 from image_dataset import *
 from plotting_tools import *
 from video_dataset import *
+import os
 
 
 def save_keras_model(name, model):
     trained_models_dir = 'trained_models/'
+
+    if not os.path.exists(trained_models_dir):
+        os.makedirs(trained_models_dir)
 
     model_json = model.to_json()
     with open(trained_models_dir + name + '.json', 'w') as json_file:
