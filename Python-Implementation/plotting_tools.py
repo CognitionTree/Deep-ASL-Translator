@@ -1,11 +1,12 @@
+import matplotlib.pyplot as plt;
 from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt; plt.rcdefaults()
-import matplotlib.pyplot as pl
+
+plt.rcdefaults()
 import numpy as np
 import itertools
-from sklearn.manifold import TSNE
 
-#-----------------------Confusion Matrix-------------------------
+
+# -----------------------Confusion Matrix-------------------------
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
@@ -41,14 +42,14 @@ def plot_confusion_matrix(cm, classes,
 
 
 def build_confusion_matrix(y_true, y_pred, classes, title='Confusion Matrix'):
-	cnf_matrix = confusion_matrix(y_true, y_pred)
-	plt.figure()
-	plot_confusion_matrix(cnf_matrix, classes=classes, title=title)
-	#plt.show()
-	results_dir = 'results/'
-	plt.savefig(results_dir+title+'.png')
-	plt.close()
-#--------------------------Confusion Matrix------------------------
+    cnf_matrix = confusion_matrix(y_true, y_pred)
+    plt.figure()
+    plot_confusion_matrix(cnf_matrix, classes=classes, title=title)
+    results_dir = 'results/'
+    plt.savefig(results_dir + title + '.png')
+    plt.close()
 
-#build_confusion_matrix(np.array([1,1,1,2,2,2,4,4,4]), np.array([1,1,2,2,2,4,4,4,4]), [1,2,4])
-#display_distribution([1,2,3,4,5,6,7,8,9])
+# --------------------------Confusion Matrix------------------------
+
+# build_confusion_matrix(np.array([1,1,1,2,2,2,4,4,4]), np.array([1,1,2,2,2,4,4,4,4]), [1,2,4])
+# display_distribution([1,2,3,4,5,6,7,8,9])
